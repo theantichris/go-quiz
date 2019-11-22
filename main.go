@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -49,7 +50,7 @@ questionLoop:
 			if err != nil {
 				handleError(fmt.Sprintf("Could not read input: %v", err))
 			}
-			answerChan <- answer
+			answerChan <- strings.TrimSpace(answer)
 		}()
 
 		select {
@@ -69,7 +70,7 @@ questionLoop:
 func makeProblems(lines [][]string) []problem {
 	problems := make([]problem, len(lines))
 	for i, line := range lines {
-		problems[i] = problem{line[0], line[1]}
+		problems[i] = problem{line[0], strings.TrimSpace(line[1])}
 	}
 
 	return problems

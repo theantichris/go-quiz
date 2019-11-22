@@ -1,3 +1,3 @@
-# go-template
+# go-quiz
 
- A template Go repository.
+ A simple quiz game written in Go.

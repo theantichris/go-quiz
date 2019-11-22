@@ -1,3 +1,3 @@
-module github.com/theantichris/go-template
+module github.com/theantichris/go-quiz
 
 go 1.13

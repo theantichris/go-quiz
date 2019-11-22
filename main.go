@@ -50,6 +50,8 @@ questionLoop:
 			if err != nil {
 				handleError(fmt.Sprintf("Could not read input: %v", err))
 			}
+			answer = strings.TrimSpace(answer)
+			answer = strings.ToLower(answer)
 			answerChan <- strings.TrimSpace(answer)
 		}()
 
@@ -70,7 +72,9 @@ questionLoop:
 func makeProblems(lines [][]string) []problem {
 	problems := make([]problem, len(lines))
 	for i, line := range lines {
-		problems[i] = problem{line[0], strings.TrimSpace(line[1])}
+		answer := strings.TrimSpace(line[1])
+		answer = strings.ToLower(answer)
+		problems[i] = problem{line[0], answer}
 	}
 
 	return problems

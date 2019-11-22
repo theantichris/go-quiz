@@ -18,15 +18,13 @@ func main() {
 
 	file, err := os.Open(*csvFilename)
 	if err != nil {
-		fmt.Printf("Could not open file %q: %v\n", *csvFilename, err)
-		os.Exit(1)
+		handleError(fmt.Sprintf("Could not open file %q: %v\n", *csvFilename, err))
 	}
 
 	fileReader := csv.NewReader(file)
 	records, err := fileReader.ReadAll()
 	if err != nil {
-		fmt.Printf("Could not read file %q: %v\n", *csvFilename, err)
-		os.Exit(1)
+		handleError(fmt.Sprintf("Could not read file %q: %v\n", *csvFilename, err))
 	}
 
 	numberCorrect := 0
@@ -36,8 +34,7 @@ func main() {
 		var userAnswer string
 		_, err := fmt.Scanf("%s\n", &userAnswer)
 		if err != nil {
-			fmt.Printf("Could not read input: %v", err)
-			os.Exit(0)
+			handleError(fmt.Sprintf("Could not read input: %v", err))
 		}
 
 		if userAnswer == record[1] {
@@ -47,4 +44,9 @@ func main() {
 
 	fmt.Printf("Your correct answers: %d of %d\n", numberCorrect, len(records))
 	os.Exit(0)
+}
+
+func handleError(message string) {
+	fmt.Println(message)
+	os.Exit(1)
 }

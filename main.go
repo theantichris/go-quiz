@@ -8,8 +8,12 @@ import (
 	"os"
 )
 
+const csvFilenameFlag = "csv"
+const csvFilenameDefault = "problems.csv"
+const csvFilenameHelper = "a CSV file in the form of 'question,answer'"
+
 func main() {
-	csvFilename := flag.String("csv", "problems.csv", "a CSV file in the form of 'question,answer'")
+	csvFilename := flag.String(csvFilenameFlag, csvFilenameDefault, csvFilenameHelper)
 	flag.Parse()
 
 	file, err := os.Open(*csvFilename)

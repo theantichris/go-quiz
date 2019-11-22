@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"time"
 )
 
 const csvFilenameFlag = "csv"
@@ -19,6 +20,7 @@ type problem struct {
 
 func main() {
 	csvFilename := flag.String(csvFilenameFlag, csvFilenameDefault, csvFilenameHelper)
+	timelimit := flag.Int("timer", 30, "the time limit for the quiz in seconds")
 	flag.Parse()
 
 	file, err := os.Open(*csvFilename)
@@ -27,36 +29,47 @@ func main() {
 	}
 
 	fileReader := csv.NewReader(file)
-	records, err := fileReader.ReadAll()
+	lines, err := fileReader.ReadAll()
 	if err != nil {
 		handleError(fmt.Sprintf("Could not read file %q: %v\n", *csvFilename, err))
 	}
 
-	problems := createProblems(records)
-
 	numberCorrect := 0
+	problems := makeProblems(lines)
+	timer := time.NewTimer(time.Duration(*timelimit) * time.Second)
+
+questionLoop:
 	for _, problem := range problems {
-		fmt.Printf("%s: ", problem.question)
+		fmt.Printf("%s = ", problem.question)
 
-		var userAnswer string
-		_, err := fmt.Scanf("%s\n", &userAnswer)
-		if err != nil {
-			handleError(fmt.Sprintf("Could not read input: %v", err))
-		}
+		answerChan := make(chan string)
+		go func() {
+			var answer string
+			_, err := fmt.Scanf("%s\n", &answer)
+			if err != nil {
+				handleError(fmt.Sprintf("Could not read input: %v", err))
+			}
+			answerChan <- answer
+		}()
 
-		if userAnswer == problem.answer {
-			numberCorrect++
+		select {
+		case answer := <-answerChan:
+			if answer == problem.answer {
+				numberCorrect++
+			}
+		case <-timer.C:
+			fmt.Println()
+			break questionLoop
 		}
 	}
 
-	fmt.Printf("Your correct answers: %d of %d\n", numberCorrect, len(records))
-	os.Exit(0)
+	fmt.Printf("Your correct answers: %d of %d\n", numberCorrect, len(lines))
 }
 
-func createProblems(records [][]string) []problem {
-	problems := make([]problem, len(records))
-	for i, record := range records {
-		problems[i] = problem{record[0], record[1]}
+func makeProblems(lines [][]string) []problem {
+	problems := make([]problem, len(lines))
+	for i, line := range lines {
+		problems[i] = problem{line[0], line[1]}
 	}
 
 	return problems

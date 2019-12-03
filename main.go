@@ -5,10 +5,13 @@ import (
 	"encoding/csv"
 	"flag"
 	"fmt"
+	"math/rand"
 	"os"
 	"strings"
 	"time"
 )
+
+// TODO: Add an option (a new flag) to shuffle the quiz order each time it is run.
 
 const csvFilenameFlag = "csv"
 const csvFilenameDefault = "problems.csv"
@@ -22,6 +25,8 @@ type problem struct {
 func main() {
 	csvFilename := flag.String(csvFilenameFlag, csvFilenameDefault, csvFilenameHelper)
 	timelimit := flag.Int("timer", 30, "the time limit for the quiz in seconds")
+	var shuffle bool
+	flag.BoolVar(&shuffle, "shuffle", false, "if true the questions are given in a random order")
 	flag.Parse()
 
 	file, err := os.Open(*csvFilename)
@@ -36,7 +41,7 @@ func main() {
 	}
 
 	numberCorrect := 0
-	problems := makeProblems(lines)
+	problems := makeProblems(lines, shuffle)
 	timer := time.NewTimer(time.Duration(*timelimit) * time.Second)
 
 questionLoop:
@@ -69,7 +74,11 @@ questionLoop:
 	fmt.Printf("Your correct answers: %d of %d\n", numberCorrect, len(lines))
 }
 
-func makeProblems(lines [][]string) []problem {
+func makeProblems(lines [][]string, shuffle bool) []problem {
+	if shuffle {
+		lines = shuffleLines(lines)
+	}
+
 	problems := make([]problem, len(lines))
 	for i, line := range lines {
 		answer := strings.TrimSpace(line[1])
@@ -78,6 +87,16 @@ func makeProblems(lines [][]string) []problem {
 	}
 
 	return problems
+}
+
+func shuffleLines(lines [][]string) [][]string {
+	newLines := make([][]string, len(lines))
+	r := rand.New(rand.NewSource(time.Now().Unix()))
+	for i, randomIndex := range r.Perm(len(lines)) {
+		newLines[i] = lines[randomIndex]
+	}
+
+	return newLines
 }
 
 func handleError(message string) {

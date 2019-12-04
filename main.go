@@ -11,8 +11,6 @@ import (
 	"time"
 )
 
-// TODO: Add an option (a new flag) to shuffle the quiz order each time it is run.
-
 const csvFilenameFlag = "csv"
 const csvFilenameDefault = "problems.csv"
 const csvFilenameHelper = "a CSV file in the form of 'question,answer'"
